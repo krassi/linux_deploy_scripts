@@ -1,15 +1,23 @@
 #!/bin/bash
 
 # Script to set up SSH public key authentication on a remote host
-# Usage: ./deploy_ssh_key.sh <username>@<host>[:<port>] <public_ssh_key>
+# Usage: ./deploy_ssh_key.sh [--password|-p] <username>@<host>[:<port>] <public_ssh_key>
 
 set -e
 
+# Parse optional --password flag
+FORCE_PASSWORD=false
+if [[ "$1" == "--password" ]] || [[ "$1" == "-p" ]]; then
+    FORCE_PASSWORD=true
+    shift
+fi
+
 # Check if required arguments are provided
 if [ $# -ne 2 ]; then
-    echo "Usage: $0 <username>@<host>[:<port>] <public_ssh_key>"
+    echo "Usage: $0 [--password|-p] <username>@<host>[:<port>] <public_ssh_key>"
     echo "Example: $0 user@example.com:22 id_rsa"
-    echo "Example: $0 user@example.com id_rsa.pub"
+    echo "Example: $0 --password user@example.com id_rsa.pub"
+    echo "Example: $0 -p user@example.com id_rsa.pub"
     exit 1
 fi
 
@@ -64,8 +72,16 @@ fi
 echo "Connecting to $HOST:$PORT as $USERNAME..."
 echo "Setting up SSH key authentication..."
 
+# Determine SSH options
+SSH_OPTS="-p $PORT"
+if [ "$FORCE_PASSWORD" = true ]; then
+    # Force password authentication, disable identity/key-based auth
+    echo "Forcing password authentication..."
+    SSH_OPTS="$SSH_OPTS -o PubkeyAuthentication=no -o PreferredAuthentications=password,keyboard-interactive"
+fi
+
 # SSH into the remote host and execute commands
-ssh -p "$PORT" "${USERNAME}@${HOST}" bash <<EOF
+ssh $SSH_OPTS "${USERNAME}@${HOST}" bash <<EOF
 set -e
 
 # Create .ssh directory if it doesn't exist
