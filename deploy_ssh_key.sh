@@ -14,10 +14,10 @@ fi
 
 # Check if required arguments are provided
 if [ $# -ne 2 ]; then
-    echo "Usage: $0 [--password|-p] <username>@<host>[:<port>] <public_ssh_key>"
+    echo "Usage: $0 [--password|-p] <username>@<host>[:<port>] <public key file or string>"
     echo "Example: $0 user@example.com:22 id_rsa"
-    echo "Example: $0 --password user@example.com id_rsa.pub"
-    echo "Example: $0 -p user@example.com id_rsa.pub"
+    echo "Example: $0 --password user@example.com <public key file or string>"
+    echo "Example: $0 -p user@example.com <public key file or string>"
     exit 1
 fi
 
